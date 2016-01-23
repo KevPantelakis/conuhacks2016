@@ -4,17 +4,23 @@
   Servo rotator; 
 
   int pos; 
+  int angl; 
+  int poten; 
   
 void setup() {
    rotator.attach(6);
+   Serial.begin(9600); 
+   
 }
 
 void loop() {
-      
-    for (pos = (180*analogRead(A5))/1023); pos >= 0; pos -= 1) { 
-    rotator.write(pos);             
-    delay(15);                    
-  }
+  
+  poten = analogRead(A5); 
+  angl = map(poten, 0, 1023, 0 , 179);
+   
+  rotator.write(angl);   
+  delay(15);
+ 
    
 
 }
