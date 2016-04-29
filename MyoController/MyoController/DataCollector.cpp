@@ -125,3 +125,5 @@ void DataCollector::print() {
 myo::Pose DataCollector::getPose() {
 	return currentPose;
 }
+
+ServerClient* DataCollector::getClient() { return nullptr; }

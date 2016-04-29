@@ -14,7 +14,6 @@ public:
 	int servo, speed;
 
 	ServerInfo() {
-
 		message = nullptr;
 	}
 
@@ -61,7 +60,7 @@ public:
 
 				case 4:
 
-					servo = SDL_atof(tmp.c_str());
+					servo = SDL_atoi(tmp.c_str());
 					break;
 
 				case 5:
@@ -159,7 +158,7 @@ public:
 
 				case 3:
 
-					servo = SDL_atof(tmp.c_str());
+					servo = SDL_atoi(tmp.c_str());
 					break;
 
 				case 4:

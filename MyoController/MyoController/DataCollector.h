@@ -10,6 +10,12 @@
 #include <stdexcept>
 #include <string>
 #include <algorithm>
+#include <SDL2\SDL.h>
+#include <SDL2\SDL_Net.h>
+#include "SocketException.h"
+#include "Info.h"
+#include "ServerClient.h"
+
 class DataCollector : public myo::DeviceListener
 {
 protected:
@@ -21,6 +27,7 @@ protected:
 	int roll_w, pitch_w;
 	myo::Pose currentPose;
 	myo::Myo* theMyo;
+	ServerClient* client;
 
 public:
 	DataCollector();
@@ -35,5 +42,6 @@ public:
 	void onLock(myo::Myo* myo, uint64_t timestamp);
 	void print();
 	myo::Pose getPose();
+	ServerClient* getClient();
 };
 

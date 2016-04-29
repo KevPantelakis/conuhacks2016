@@ -1,14 +1,15 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
 // Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 
+
 // Adapted by Kevin Pantelakis in 2016.
 #include "DataCollector.h"
 #include "WifiDataCollector.h"
 
 int main(int argc, char** argv)
 {
+	SDLNet_Init();
 	// We catch any exceptions that might occur below -- see the catch statement for more details.
-	try {
 
 		// First, we create a Hub with our application identifier. Be sure not to use the com.example namespace when
 		// publishing your application. The Hub provides access to one or more Myos.
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
 		std::cout << "Connected to a Myo armband!" << std::endl << std::endl;
 
 		// Next we construct an instance of our DeviceListener, so that we can register it with the Hub.
-		DataCollector collector(myo);
+		WifiDataCollector collector(myo);
 
 		// Hub::addListener() takes the address of any object whose class inherits from DeviceListener, and will cause
 		// Hub::run() to send events to all registered device listeners.
@@ -46,34 +47,52 @@ int main(int argc, char** argv)
 			if (collector.getPose() == myo::Pose::waveOut)
 				break;
 		}
+		std::cout << "DoubleTap to start exit sequence" << std::endl;
+		if (collector.getClient() == nullptr) {
+			//The main loop.
+			for (;;) {
+				// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
+				// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
+				hub.run(1000 / 20);
+				// After processing events, we call the print() member function we defined above to print out the values we've
+				// obtained from any events that have occurred.
+				collector.print();
+				if (collector.getPose() == myo::Pose::doubleTap) {
+					//confirm exit
+					std::cout << "Wave out to exit or Wave in to continue              " << std::endl << std::endl;
+					for (;;) {
 
-		//The main loop.
-		for (;;) {
-			// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
-			// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
-			hub.run(1000 / 20);
-			// After processing events, we call the print() member function we defined above to print out the values we've
-			// obtained from any events that have occurred.
-			collector.print();
-			if (collector.getPose() == myo::Pose::doubleTap) {
-				//confirm exit
-				std::cout << "Wave out to exit or Wave in to continue              " << std::endl << std::endl;
-				for (;;) {
-					hub.run(1);
-					if (collector.getPose() == myo::Pose::waveOut)
-						return 0;
-					else if (collector.getPose() == myo::Pose::waveIn) break;
+						hub.run(1);
+						if (collector.getPose() == myo::Pose::waveOut)
+							return 0;
+						else if (collector.getPose() == myo::Pose::waveIn) break;
+					}
 				}
 			}
-
 		}
-
+		else {
+			while (!collector.getClient()->getShutdownStatus()) {
+				collector.getClient()->checkForIncomingMessages();
+				// In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
+				// In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
+				hub.run(1000 / 20);
+				// After processing events, we call the print() member function we defined above to print out the values we've
+				// obtained from any events that have occurred.
+				collector.print();
+				if (collector.getPose() == myo::Pose::doubleTap) {
+					//confirm exit
+					std::cout << "Wave out to exit or Wave in to continue              " << std::endl << std::endl;
+					for (;;) {
+						hub.run(1);
+						if (collector.getPose() == myo::Pose::waveOut)
+							return 0;
+						else if (collector.getPose() == myo::Pose::waveIn) break;
+					}
+				}
+			}
+		}
 		// If a standard exception occurred, we print out its message and exit.
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Error: " << e.what() << std::endl;
-		std::cerr << "Press enter to continue.";
-		std::cin.ignore();
-		return 1;
-	}
+
+
+	return 0;
 }

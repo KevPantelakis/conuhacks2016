@@ -2,18 +2,23 @@
 
 void MessageReaction(ServerInfo* info) {}
 
-WifiDataCollector::WifiDataCollector(myo::Myo* theMyo) : DataCollector(theMyo)
-{
+WifiDataCollector::WifiDataCollector(myo::Myo* theMyo) : DataCollector(theMyo){
 	client = new ServerClient("104.236.69.2", 8889, 512, MessageReaction,"client");
-}
-
-
-WifiDataCollector::~WifiDataCollector()
-{
-	delete client;
+	client->connectToServer();
 }
 
 ServerClient* WifiDataCollector::getClient() { return client; }
+
+WifiDataCollector::~WifiDataCollector(){
+	ClientInfo* clientinfo = new ClientInfo();
+	clientinfo->ID = 0;
+	clientinfo->message = new std::string("message");
+	clientinfo->name = "Client";
+	clientinfo->servo = 90;
+	clientinfo->speed = 0;
+	client->sendToServer(clientinfo);
+	delete client;
+}
 
 void WifiDataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& quat) {
 	
@@ -42,7 +47,7 @@ void WifiDataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, con
 
 	//Gives an interval of 30 degrees to stabilize at 0 degrees.
 	//The 0 degree on the servo motor is at 90 degrees.
-	if (roll_w > -15 && roll_w < 15) {
+	if (roll_w >= -15 && roll_w <= 15) {
 		roll_w = 90;
 	}
 
@@ -65,12 +70,12 @@ void WifiDataCollector::onOrientationData(myo::Myo* myo, uint64_t timestamp, con
 
 	//Gives an interval of 30 degrees to stabilize at 0 degrees.
 	// Parking state
-	if (pitch_w > -15 && pitch_w < 15) {
+	if (pitch_w >= -15 && pitch_w <= 15) {
 		pitch_w = 0;
 	}
 
 	//Reverse speeds
-	else if (pitch_w <= -15) {
+	else if (pitch_w < -15) {
 		if (pitch_w >= -35) pitch_w = 4;
 		else if (pitch_w >= -55) pitch_w = 5;
 		else pitch_w = 6;
